@@ -16,387 +16,212 @@ uint8_t selectedCell = 1; // the ID (not tileid) of the cell
 BOOLEAN Buildmode = 1;
 typedef struct cell
 {
-    uint8_t Cell_ID;    // what kind of cell are they?
-    uint8_t standingOn; // just the tile id (used to check if on mad block)
-    uint8_t direction;  // up down, left or right? 0 = right, 1 = down, 2 = left, 3 = up.
-    uint8_t x;          // initial starting position.
+    uint8_t Cell_ID;   // what kind of cell are they?
+    BOOLEAN canMove;   // used to check if the block can be pushed
+    uint8_t direction; // up down, left or right? 0 = right, 1 = down, 2 = left, 3 = up.
+    BOOLEAN ticked;    // if the cell was not updated this frame, go ahead and just dump it into the next, this prevents deleteions.
+    uint8_t x;         // initial starting position.
     uint8_t y;
 } cell;
 
 void Run_Sim()
 {
-
+    for (uint16_t i = 0; i < 360; i++)
+    {
+        PlayGrid[i].ticked = FALSE;
+    }
     for (uint8_t x = 0; x < 20; x++)
     {
         for (uint8_t y = 0; y < 18; y++)
         {
-            uint8_t blocksToMove = 0;
-
+            BOOLEAN AllowPush = FALSE;
+            BOOLEAN Test = TRUE;
+            uint8_t Cursor = 0;
             switch (PlayGrid[y * 20 + x].Cell_ID)
             {
+            case Push:
+                if (SimBuff[y * 20 + x].ticked == FALSE)
+                    SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+
+                break;
+
+            case Immobile:
+                SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                break;
+
+            case Trash:
+                SimBuff[y * 20 + x + 1] = PlayGrid[y * 20 + x + 1];
+                SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x - 1];
+                SimBuff[(y + 1) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
+                SimBuff[(y - 1) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
+                SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                break;
+
             case Mover:
                 switch (PlayGrid[y * 20 + x].direction)
                 {
 
                 case right:
-                    
 
-
-                   if (x - 1 >= 0 && PlayGrid[y * 20 + x +1].Cell_ID == FreeSpace)
+                    while (Test == TRUE)
                     {
-
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +2].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +3].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +3] = PlayGrid[y * 20 + x +2];
-                        SimBuff[y * 20 + x +3].y = x - 3;
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +4].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +4] = PlayGrid[y * 20 + x +3];
-                        SimBuff[y * 20 + x +4].y = x - 4;
-                        SimBuff[y * 20 + x +3] = PlayGrid[y * 20 + x +2];
-                        SimBuff[y * 20 + x +3].y = x - 3;
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +5].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +5] = PlayGrid[y * 20 + x +4];
-                        SimBuff[y * 20 + x +5].y = x - 5;
-                        SimBuff[y * 20 + x +4] = PlayGrid[y * 20 + x +3];
-                        SimBuff[y * 20 + x +4].y = x - 4;
-                        SimBuff[y * 20 + x +3] = PlayGrid[y * 20 + x +2];
-                        SimBuff[y * 20 + x +3].y = x - 3;
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +6].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +6] = PlayGrid[y * 20 + x +5];
-                        SimBuff[y * 20 + x +6].y = x - 6;
-                        SimBuff[y * 20 + x +5] = PlayGrid[y * 20 + x +4];
-                        SimBuff[y * 20 + x +5].y = x - 5;
-                        SimBuff[y * 20 + x +4] = PlayGrid[y * 20 + x +3];
-                        SimBuff[y * 20 + x +4].y = x - 4;
-                        SimBuff[y * 20 + x +3] = PlayGrid[y * 20 + x +2];
-                        SimBuff[y * 20 + x +3].y = x - 3;
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x +7].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x +7] = PlayGrid[y * 20 + x +6];
-                        SimBuff[y * 20 + x +7].y = x - 7;
-                        SimBuff[y * 20 + x +6] = PlayGrid[y * 20 + x +5];
-                        SimBuff[y * 20 + x +6].y = x - 6;
-                        SimBuff[y * 20 + x +5] = PlayGrid[y * 20 + x +4];
-                        SimBuff[y * 20 + x +5].y = x - 5;
-                        SimBuff[y * 20 + x +4] = PlayGrid[y * 20 + x +3];
-                        SimBuff[y * 20 + x +4].y = x - 4;
-                        SimBuff[y * 20 + x +3] = PlayGrid[y * 20 + x +2];
-                        SimBuff[y * 20 + x +3].y = x - 3;
-                        SimBuff[y * 20 + x +2] = PlayGrid[y * 20 + x +1];
-                        SimBuff[y * 20 + x +2].y = x - 2;
-                        SimBuff[y * 20 + x +1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x +1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        if (PlayGrid[y * 20 + x + Cursor].Cell_ID != FreeSpace)
+                        {
+                            if (PlayGrid[y * 20 + x + Cursor].canMove == TRUE)
+                            {
+                                Cursor++;
+                            }
+                            else
+                            {
+                                Test = FALSE;
+                            }
+                        }
+                        else
+                        {
+                            AllowPush = TRUE;
+                            Test = FALSE;
+                        }
                     }
 
-                    break;
+                    if (AllowPush == TRUE)
+                    {
+                        while ((y * 20 + x + Cursor) != (y * 20 + x))
+                        {
 
-                case left:
-                    
+                            SimBuff[y * 20 + x + Cursor] = PlayGrid[y * 20 + x + (Cursor - 1)];
+                            SimBuff[y * 20 + x + Cursor].x = x + Cursor;
+                            SimBuff[y * 20 + x + Cursor].ticked = TRUE;
+                            SimBuff[y * 20 + x + (Cursor - 1)].Cell_ID = EmptyCell[0].Cell_ID;
 
+                            Cursor--;
+                        }
+                    }
 
-
-                   if (x - 1 >= 0 && PlayGrid[y * 20 + x - 1].Cell_ID == FreeSpace)
-                    {
-
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 2].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 3].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 3] = PlayGrid[y * 20 + x - 2];
-                        SimBuff[y * 20 + x - 3].y = x - 3;
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 4].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 4] = PlayGrid[y * 20 + x - 3];
-                        SimBuff[y * 20 + x - 4].y = x - 4;
-                        SimBuff[y * 20 + x - 3] = PlayGrid[y * 20 + x - 2];
-                        SimBuff[y * 20 + x - 3].y = x - 3;
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 5].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 5] = PlayGrid[y * 20 + x - 4];
-                        SimBuff[y * 20 + x - 5].y = x - 5;
-                        SimBuff[y * 20 + x - 4] = PlayGrid[y * 20 + x - 3];
-                        SimBuff[y * 20 + x - 4].y = x - 4;
-                        SimBuff[y * 20 + x - 3] = PlayGrid[y * 20 + x - 2];
-                        SimBuff[y * 20 + x - 3].y = x - 3;
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 6].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 6] = PlayGrid[y * 20 + x - 5];
-                        SimBuff[y * 20 + x - 6].y = x - 6;
-                        SimBuff[y * 20 + x - 5] = PlayGrid[y * 20 + x - 4];
-                        SimBuff[y * 20 + x - 5].y = x - 5;
-                        SimBuff[y * 20 + x - 4] = PlayGrid[y * 20 + x - 3];
-                        SimBuff[y * 20 + x - 4].y = x - 4;
-                        SimBuff[y * 20 + x - 3] = PlayGrid[y * 20 + x - 2];
-                        SimBuff[y * 20 + x - 3].y = x - 3;
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[y * 20 + x - 7].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[y * 20 + x - 7] = PlayGrid[y * 20 + x - 6];
-                        SimBuff[y * 20 + x - 7].y = x - 7;
-                        SimBuff[y * 20 + x - 6] = PlayGrid[y * 20 + x - 5];
-                        SimBuff[y * 20 + x - 6].y = x - 6;
-                        SimBuff[y * 20 + x - 5] = PlayGrid[y * 20 + x - 4];
-                        SimBuff[y * 20 + x - 5].y = x - 5;
-                        SimBuff[y * 20 + x - 4] = PlayGrid[y * 20 + x - 3];
-                        SimBuff[y * 20 + x - 4].y = x - 4;
-                        SimBuff[y * 20 + x - 3] = PlayGrid[y * 20 + x - 2];
-                        SimBuff[y * 20 + x - 3].y = x - 3;
-                        SimBuff[y * 20 + x - 2] = PlayGrid[y * 20 + x - 1];
-                        SimBuff[y * 20 + x - 2].y = x - 2;
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x];
-                        SimBuff[y * 20 + x - 1].y = x - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    break;
-
-                case up:
-                    if (y - 1 >= 0 && PlayGrid[(y - 1) * 20 + x].Cell_ID == FreeSpace)
-                    {
-
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 2) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 3) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 3) * 20 + x] = PlayGrid[(y - 2) * 20 + x];
-                        SimBuff[(y - 3) * 20 + x].y = y - 3;
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 4) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 4) * 20 + x] = PlayGrid[(y - 3) * 20 + x];
-                        SimBuff[(y - 4) * 20 + x].y = y - 4;
-                        SimBuff[(y - 3) * 20 + x] = PlayGrid[(y - 2) * 20 + x];
-                        SimBuff[(y - 3) * 20 + x].y = y - 3;
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 5) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 5) * 20 + x] = PlayGrid[(y - 4) * 20 + x];
-                        SimBuff[(y - 5) * 20 + x].y = y - 5;
-                        SimBuff[(y - 4) * 20 + x] = PlayGrid[(y - 3) * 20 + x];
-                        SimBuff[(y - 4) * 20 + x].y = y - 4;
-                        SimBuff[(y - 3) * 20 + x] = PlayGrid[(y - 2) * 20 + x];
-                        SimBuff[(y - 3) * 20 + x].y = y - 3;
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 6) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 6) * 20 + x] = PlayGrid[(y - 5) * 20 + x];
-                        SimBuff[(y - 6) * 20 + x].y = y - 6;
-                        SimBuff[(y - 5) * 20 + x] = PlayGrid[(y - 4) * 20 + x];
-                        SimBuff[(y - 5) * 20 + x].y = y - 5;
-                        SimBuff[(y - 4) * 20 + x] = PlayGrid[(y - 3) * 20 + x];
-                        SimBuff[(y - 4) * 20 + x].y = y - 4;
-                        SimBuff[(y - 3) * 20 + x] = PlayGrid[(y - 2) * 20 + x];
-                        SimBuff[(y - 3) * 20 + x].y = y - 3;
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y - 7) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y - 7) * 20 + x] = PlayGrid[(y - 6) * 20 + x];
-                        SimBuff[(y - 7) * 20 + x].y = y - 7;
-                        SimBuff[(y - 6) * 20 + x] = PlayGrid[(y - 5) * 20 + x];
-                        SimBuff[(y - 6) * 20 + x].y = y - 6;
-                        SimBuff[(y - 5) * 20 + x] = PlayGrid[(y - 4) * 20 + x];
-                        SimBuff[(y - 5) * 20 + x].y = y - 5;
-                        SimBuff[(y - 4) * 20 + x] = PlayGrid[(y - 3) * 20 + x];
-                        SimBuff[(y - 4) * 20 + x].y = y - 4;
-                        SimBuff[(y - 3) * 20 + x] = PlayGrid[(y - 2) * 20 + x];
-                        SimBuff[(y - 3) * 20 + x].y = y - 3;
-                        SimBuff[(y - 2) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
-                        SimBuff[(y - 2) * 20 + x].y = y - 2;
-                        SimBuff[(y - 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y - 1) * 20 + x].y = y - 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
                     break;
 
                 case down:
 
-                   if (y + 1 >= 0 && PlayGrid[(y + 1) * 20 + x].Cell_ID == FreeSpace)
+                    while (Test == TRUE)
                     {
+                        if (PlayGrid[(y + Cursor) * 20 + x].Cell_ID != FreeSpace)
+                        {
+                            if (PlayGrid[(y + Cursor) * 20 + x].canMove == TRUE)
+                            {
+                                Cursor++;
+                            }
+                            else
+                            {
+                                Test = FALSE;
+                            }
+                        }
+                        else
+                        {
+                            AllowPush = TRUE;
+                            Test = FALSE;
+                        }
+                    }
 
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
-                    else if (PlayGrid[(y + 2) * 20 + x].Cell_ID == FreeSpace)
+                    if (AllowPush == TRUE)
                     {
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        while ((y + Cursor) * 20 + x != y * 20 + x)
+                        {
+
+                            SimBuff[(y + Cursor) * 20 + x] = PlayGrid[(y + (Cursor - 1)) * 20 + x];
+                            SimBuff[(y + Cursor) * 20 + x].y = y + Cursor;
+                            SimBuff[(y + Cursor) * 20 + x].ticked = TRUE;
+                            SimBuff[(y + (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+
+                            Cursor--;
+                        }
                     }
-                    else if (PlayGrid[(y + 3) * 20 + x].Cell_ID == FreeSpace)
+
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
+                    break;
+
+                case left:
+                    while (Test == TRUE)
                     {
-                        SimBuff[(y + 3) * 20 + x] = PlayGrid[(y + 2) * 20 + x];
-                        SimBuff[(y + 3) * 20 + x].y = y + 3;
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        if (PlayGrid[y * 20 + x - Cursor].Cell_ID != FreeSpace)
+                        {
+                            if (PlayGrid[y * 20 + x - Cursor].canMove == TRUE)
+                            {
+                                Cursor++;
+                            }
+                            else
+                            {
+                                Test = FALSE;
+                            }
+                        }
+                        else
+                        {
+                            AllowPush = TRUE;
+                            Test = FALSE;
+                        }
                     }
-                    else if (PlayGrid[(y + 4) * 20 + x].Cell_ID == FreeSpace)
+
+                    if (AllowPush == TRUE)
                     {
-                        SimBuff[(y + 4) * 20 + x] = PlayGrid[(y + 3) * 20 + x];
-                        SimBuff[(y + 4) * 20 + x].y = y + 4;
-                        SimBuff[(y + 3) * 20 + x] = PlayGrid[(y + 2) * 20 + x];
-                        SimBuff[(y + 3) * 20 + x].y = y + 3;
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        while ((y * 20 + x - Cursor) != (y * 20 + x))
+                        {
+
+                            SimBuff[y * 20 + x - Cursor] = PlayGrid[y * 20 + x - (Cursor - 1)];
+                            SimBuff[y * 20 + x - Cursor].x = x - Cursor;
+                            SimBuff[y * 20 + x - Cursor].ticked = TRUE;
+                            SimBuff[y * 20 + x - (Cursor - 1)].Cell_ID = EmptyCell[0].Cell_ID;
+
+                            Cursor--;
+                        }
                     }
-                    else if (PlayGrid[(y + 5) * 20 + x].Cell_ID == FreeSpace)
+
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
+                    break;
+
+                case up:
+
+                    while (Test == TRUE)
                     {
-                        SimBuff[(y + 5) * 20 + x] = PlayGrid[(y + 4) * 20 + x];
-                        SimBuff[(y + 5) * 20 + x].y = y + 5;
-                        SimBuff[(y + 4) * 20 + x] = PlayGrid[(y + 3) * 20 + x];
-                        SimBuff[(y + 4) * 20 + x].y = y + 4;
-                        SimBuff[(y + 3) * 20 + x] = PlayGrid[(y + 2) * 20 + x];
-                        SimBuff[(y + 3) * 20 + x].y = y + 3;
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        if (PlayGrid[(y - Cursor) * 20 + x].Cell_ID != FreeSpace)
+                        {
+                            if (PlayGrid[(y - Cursor) * 20 + x].canMove == TRUE)
+                            {
+                                Cursor++;
+                            }
+                            else
+                            {
+                                Test = FALSE;
+                            }
+                        }
+                        else
+                        {
+                            AllowPush = TRUE;
+                            Test = FALSE;
+                        }
                     }
-                    else if (PlayGrid[(y + 6) * 20 + x].Cell_ID == FreeSpace)
+
+                    if (AllowPush == TRUE)
                     {
-                        SimBuff[(y + 6) * 20 + x] = PlayGrid[(y + 5) * 20 + x];
-                        SimBuff[(y + 6) * 20 + x].y = y + 6;
-                        SimBuff[(y + 5) * 20 + x] = PlayGrid[(y + 4) * 20 + x];
-                        SimBuff[(y + 5) * 20 + x].y = y + 5;
-                        SimBuff[(y + 4) * 20 + x] = PlayGrid[(y + 3) * 20 + x];
-                        SimBuff[(y + 4) * 20 + x].y = y + 4;
-                        SimBuff[(y + 3) * 20 + x] = PlayGrid[(y + 2) * 20 + x];
-                        SimBuff[(y + 3) * 20 + x].y = y + 3;
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                        while ((y - Cursor) * 20 + x != y * 20 + x)
+                        {
+
+                            SimBuff[(y - Cursor) * 20 + x] = PlayGrid[(y - (Cursor - 1)) * 20 + x];
+                            SimBuff[(y - Cursor) * 20 + x].y = y - Cursor;
+                            SimBuff[(y - Cursor) * 20 + x].ticked = TRUE;
+                            SimBuff[(y - (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+
+                            Cursor--;
+                        }
                     }
-                    else if (PlayGrid[(y + 7) * 20 + x].Cell_ID == FreeSpace)
-                    {
-                        SimBuff[(y + 7) * 20 + x] = PlayGrid[(y + 6) * 20 + x];
-                        SimBuff[(y + 7) * 20 + x].y = y + 7;
-                        SimBuff[(y + 6) * 20 + x] = PlayGrid[(y + 5) * 20 + x];
-                        SimBuff[(y + 6) * 20 + x].y = y + 6;
-                        SimBuff[(y + 5) * 20 + x] = PlayGrid[(y + 4) * 20 + x];
-                        SimBuff[(y + 5) * 20 + x].y = y + 5;
-                        SimBuff[(y + 4) * 20 + x] = PlayGrid[(y + 3) * 20 + x];
-                        SimBuff[(y + 4) * 20 + x].y = y + 4;
-                        SimBuff[(y + 3) * 20 + x] = PlayGrid[(y + 2) * 20 + x];
-                        SimBuff[(y + 3) * 20 + x].y = y + 3;
-                        SimBuff[(y + 2) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
-                        SimBuff[(y + 2) * 20 + x].y = y + 2;
-                        SimBuff[(y + 1) * 20 + x] = PlayGrid[y * 20 + x];
-                        SimBuff[(y + 1) * 20 + x].y = y + 1;
-                        SimBuff[y * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
-                    }
+
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
                     break;
 
                 default:
@@ -405,50 +230,201 @@ void Run_Sim()
                 break;
 
             case Generator:
-                SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
                 switch (PlayGrid[y * 20 + x].direction)
                 {
 
                 case right:
                     if (PlayGrid[y * 20 + x + 1].Cell_ID == FreeSpace)
                     {
-
                         SimBuff[y * 20 + x + 1] = PlayGrid[y * 20 + x - 1];
                         SimBuff[y * 20 + x + 1].x = x + 1;
+                        SimBuff[y * 20 + x + 1].ticked = TRUE;
+                        SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
                     }
-                    break;
-
-                case left:
-                    if (PlayGrid[y * 20 + x - 1].Cell_ID == FreeSpace)
+                    else
                     {
-
-                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x + 1];
-                        SimBuff[y * 20 + x - 1].x = x - 1;
-                    }
-                    break;
-
-                case up:
-                    for (uint8_t i = 1; i <= 17; i++)
-                    {
-                        if (y - i >= 0 && PlayGrid[(y - i) * 20 + x].Cell_ID == FreeSpace)
+                        while (Test == TRUE)
                         {
-                            SimBuff[(y - i) * 20 + x] = PlayGrid[(y - i - 1) * 20 + x];
-                            SimBuff[(y - i) * 20 + x].y = y - i;
+                            if (PlayGrid[y * 20 + x + Cursor].Cell_ID != FreeSpace)
+                            {
+                                if (PlayGrid[y * 20 + x + Cursor].canMove == TRUE)
+                                {
+                                    Cursor++;
+                                }
+                                else
+                                {
+                                    Test = FALSE;
+                                }
+                            }
+                            else
+                            {
+                                AllowPush = TRUE;
+                                Test = FALSE;
+                            }
                         }
-                        else
+
+                        if (AllowPush == TRUE)
                         {
-                            break;
+                            SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                            while ((y * 20 + x + Cursor) != (y * 20 + x + 1))
+                            {
+
+                                SimBuff[y * 20 + x + Cursor] = PlayGrid[y * 20 + x + (Cursor - 1)];
+                                SimBuff[y * 20 + x + Cursor].x = x + Cursor;
+                                SimBuff[y * 20 + x + Cursor].ticked = TRUE;
+                                SimBuff[(y + (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                                Cursor--;
+                            }
                         }
                     }
+
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
                     break;
 
                 case down:
                     if (PlayGrid[(y + 1) * 20 + x].Cell_ID == FreeSpace)
                     {
-
                         SimBuff[(y + 1) * 20 + x] = PlayGrid[(y - 1) * 20 + x];
                         SimBuff[(y + 1) * 20 + x].y = y + 1;
+                        SimBuff[(y + 1) * 20 + x].ticked = TRUE;
+                        // SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
                     }
+                    else
+                    {
+                        while (Test == TRUE)
+                        {
+                            if (PlayGrid[(y + Cursor) * 20 + x].Cell_ID != FreeSpace)
+                            {
+                                if (PlayGrid[(y + Cursor) * 20 + x].canMove == TRUE)
+                                {
+                                    Cursor++;
+                                }
+                                else
+                                {
+                                    Test = FALSE;
+                                }
+                            }
+                            else
+                            {
+                                AllowPush = TRUE;
+                                Test = FALSE;
+                            }
+                        }
+
+                        if (AllowPush == TRUE)
+                        {
+                            SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                            while ((y + Cursor) * 20 + x != (y + 1) * 20 + x)
+                            {
+                                SimBuff[(y + Cursor) * 20 + x] = PlayGrid[(y - (Cursor - 1)) * 20 + x];
+                                SimBuff[(y + Cursor) * 20 + x].y = y + Cursor;
+                                SimBuff[(y + Cursor) * 20 + x].ticked = TRUE;
+                                SimBuff[(y + (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                                Cursor--;
+                            }
+                        }
+                    }
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
+                    break;
+
+                case left:
+                    if (PlayGrid[y * 20 + x - 1].Cell_ID == FreeSpace)
+                    {
+                        SimBuff[y * 20 + x - 1] = PlayGrid[y * 20 + x + 1];
+                        SimBuff[y * 20 + x - 1].x = x - 1;
+                        SimBuff[y * 20 + x - 1].ticked = TRUE;
+                        SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    }
+                    else
+                    {
+                        while (Test == TRUE)
+                        {
+                            if (PlayGrid[y * 20 + x - Cursor].Cell_ID != FreeSpace)
+                            {
+                                if (PlayGrid[y * 20 + x - Cursor].canMove == TRUE)
+                                {
+                                    Cursor++;
+                                }
+                                else
+                                {
+                                    Test = FALSE;
+                                }
+                            }
+                            else
+                            {
+                                AllowPush = TRUE;
+                                Test = FALSE;
+                            }
+                        }
+
+                        if (AllowPush == TRUE)
+                        {
+                            SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                            while ((y * 20 + x - Cursor) != (y * 20 + x - 1))
+                            {
+                                SimBuff[y * 20 + x - Cursor] = PlayGrid[y * 20 + x - (Cursor - 1)];
+                                SimBuff[y * 20 + x - Cursor].x = x - Cursor;
+                                SimBuff[y * 20 + x - Cursor].ticked = TRUE;
+                                SimBuff[(y + (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                                Cursor--;
+                            }
+                        }
+                    }
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
+                    break;
+
+                case up:
+                    if (PlayGrid[(y - 1) * 20 + x].Cell_ID == FreeSpace)
+                    {
+                        SimBuff[(y - 1) * 20 + x] = PlayGrid[(y + 1) * 20 + x];
+                        SimBuff[(y - 1) * 20 + x].y = y - 1;
+                        SimBuff[(y - 1) * 20 + x].ticked = TRUE;
+                        SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    }
+                    else
+                    {
+                        while (Test == TRUE)
+                        {
+                            if (PlayGrid[(y - Cursor) * 20 + x].Cell_ID != FreeSpace)
+                            {
+                                if (PlayGrid[(y - Cursor) * 20 + x].canMove == TRUE)
+                                {
+                                    Cursor++;
+                                }
+                                else
+                                {
+                                    Test = FALSE;
+                                }
+                            }
+                            else
+                            {
+                                AllowPush = TRUE;
+                                Test = FALSE;
+                            }
+                        }
+
+                        if (AllowPush == TRUE)
+                        {
+                            SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                            while ((y - Cursor) * 20 + x != (y - 1) * 20 + x)
+                            {
+                                SimBuff[(y - Cursor) * 20 + x] = PlayGrid[(y + (Cursor - 1)) * 20 + x];
+                                SimBuff[(y - Cursor) * 20 + x].y = y - Cursor;
+                                SimBuff[(y - Cursor) * 20 + x].ticked = TRUE;
+                                SimBuff[(y - (Cursor - 1)) * 20 + x].Cell_ID = EmptyCell[0].Cell_ID;
+                                Cursor--;
+                            }
+                        }
+                    }
+                    AllowPush = FALSE;
+                    Test = TRUE;
+                    Cursor = 0;
                     break;
 
                 default:
@@ -456,8 +432,170 @@ void Run_Sim()
                 }
                 break;
 
-            case Push:
-                SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+            case Rotator:
+                switch (PlayGrid[y * 20 + x].direction)
+                {
+
+                case right: // clock wise
+                if (SimBuff[y * 20 + x + 1].direction < 3)
+                    {
+                        SimBuff[y * 20 + x + 1].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x + 1].direction = 0;
+                    }
+
+                    if (SimBuff[y * 20 + x - 1].direction < 3)
+                    {
+                        SimBuff[y * 20 + x - 1].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x - 1].direction = 0;
+                    }
+
+                    if (SimBuff[(y + 1) * 20 + x].direction < 3)
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction = 0;
+                    }
+
+                    if (SimBuff[(y - 1) * 20 + x].direction < 3)
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction = 0;
+                    }
+                    SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    break;
+
+                case down:
+                    if (SimBuff[y * 20 + x + 1].direction > 0)
+                    {
+                        SimBuff[y * 20 + x + 1].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x + 1].direction = 3;
+                    }
+
+                    if (SimBuff[y * 20 + x - 1].direction > 0)
+                    {
+                        SimBuff[y * 20 + x - 1].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x - 1].direction = 3;
+                    }
+
+                    if (SimBuff[(y + 1) * 20 + x].direction > 0)
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction = 3;
+                    }
+
+                    if (SimBuff[(y - 1) * 20 + x].direction > 0)
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction = 3;
+                    }
+                    SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    break;
+
+                case left:
+
+                    if (SimBuff[y * 20 + x + 1].direction < 3)
+                    {
+                        SimBuff[y * 20 + x + 1].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x + 1].direction = 0;
+                    }
+
+                    if (SimBuff[y * 20 + x - 1].direction < 3)
+                    {
+                        SimBuff[y * 20 + x - 1].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x - 1].direction = 0;
+                    }
+
+                    if (SimBuff[(y + 1) * 20 + x].direction < 3)
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction = 0;
+                    }
+
+                    if (SimBuff[(y - 1) * 20 + x].direction < 3)
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction++;
+                    }
+                    else
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction = 0;
+                    }
+                    SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    break;
+
+                case up:
+                    if (SimBuff[y * 20 + x + 1].direction > 0)
+                    {
+                        SimBuff[y * 20 + x + 1].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x + 1].direction = 3;
+                    }
+
+                    if (SimBuff[y * 20 + x - 1].direction > 0)
+                    {
+                        SimBuff[y * 20 + x - 1].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[y * 20 + x - 1].direction = 3;
+                    }
+
+                    if (SimBuff[(y + 1) * 20 + x].direction > 0)
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[(y + 1) * 20 + x].direction = 3;
+                    }
+
+                    if (SimBuff[(y - 1) * 20 + x].direction > 0)
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction--;
+                    }
+                    else
+                    {
+                        SimBuff[(y - 1) * 20 + x].direction = 3;
+                    }
+                    SimBuff[y * 20 + x] = PlayGrid[y * 20 + x];
+                    break;
+
+                default:
+                    break;
+                }
                 break;
 
             default:
@@ -605,6 +743,7 @@ void main(void)
         {
             CellGrid[cury * 20 + curx].Cell_ID = selectedCell;
             CellGrid[cury * 20 + curx].direction = 0;
+
             CellGrid[cury * 20 + curx].x = curx;
             CellGrid[cury * 20 + curx].y = cury;
 
@@ -612,21 +751,36 @@ void main(void)
             {
             case 1:
                 set_tile_xy(curx, cury, Mover_R_tile);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
                 break;
 
             case 2:
                 set_tile_xy(curx, cury, Generator_R_tile);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
                 break;
 
             case 3:
                 set_tile_xy(curx, cury, Rotator_R_tile);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
                 break;
 
             case 4:
                 set_tile_xy(curx, cury, Push_tile);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
                 break;
             case 5:
                 set_tile_xy(curx, cury, Slide_LR_tile);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
+                break;
+
+            case Immobile:
+                set_tile_xy(curx, cury, selectedCell + 8);
+                CellGrid[cury * 20 + curx].canMove = FALSE;
+                break;
+
+            case Trash:
+                set_tile_xy(curx, cury, selectedCell + 8);
+                CellGrid[cury * 20 + curx].canMove = TRUE;
                 break;
 
             default:
